@@ -1,0 +1,34 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+
+# Cache do Vite
+.vite/
+
+# Variáveis de ambiente 
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# SO
+.DS_Store
+Thumbs.db
+repomix-output.xml
