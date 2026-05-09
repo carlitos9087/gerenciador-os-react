@@ -1,0 +1,2043 @@
+This file is a merged representation of a subset of the codebase, containing files not matching ignore patterns, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching these patterns are excluded: package-lock.json, repomix-output.xml, node_modules
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+index.html
+package.json
+README.md
+src/api.js
+src/App.jsx
+src/components/AlertToast.jsx
+src/components/Modal.jsx
+src/components/OSDetailPanel.jsx
+src/components/UI.jsx
+src/main.jsx
+src/pages/AssinarPage.jsx
+src/pages/CriarOSPage.jsx
+src/pages/DashboardPage.jsx
+src/pages/ExportarPage.jsx
+src/pages/GerenciarOSsPage.jsx
+src/pages/LoginPage.jsx
+src/pages/UsuariosPage.jsx
+src/styles.css
+vite.config.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+# Dependências
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+
+# Cache do Vite
+.vite/
+
+# Variáveis de ambiente 
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# SO
+.DS_Store
+Thumbs.db
+repomix-output.xml
+</file>
+
+<file path="index.html">
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerenciador de OS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="package.json">
+{
+  "name": "gerenciador-os",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.1"
+  }
+}
+</file>
+
+<file path="README.md">
+
+</file>
+
+<file path="src/api.js">
+export const URL_BASE = 'https://triumphant-clarity-production-264b.up.railway.app';
+
+export function getToken() {
+  return localStorage.getItem('os_token') || '';
+}
+
+export function getUsuario() {
+  try {
+    return JSON.parse(localStorage.getItem('os_usuario') || 'null');
+  } catch {
+    return null;
+  }
+}
+
+export function setAuth(token, usuario) {
+  localStorage.setItem('os_token', token);
+  localStorage.setItem('os_usuario', JSON.stringify(usuario));
+}
+
+export function clearAuth() {
+  localStorage.removeItem('os_token');
+  localStorage.removeItem('os_usuario');
+}
+
+export function isAuthenticated() {
+  return !!(getToken() && getUsuario());
+}
+
+function headers() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${getToken()}`,
+  };
+}
+
+export async function api(method, path, body) {
+  const opts = { method, headers: headers() };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const r = await fetch(URL_BASE + path, opts);
+  if (r.status === 401) {
+    clearAuth();
+    window.location.reload();
+  }
+  return r;
+}
+
+export function perfil(usuario) {
+  return String(usuario?.perfil || usuario?.Perfil || '').toLowerCase();
+}
+export function userId(usuario) {
+  return usuario?.id || usuario?.Id;
+}
+export function userName(usuario) {
+  return usuario?.nome || usuario?.Nome || '';
+}
+export function userPerfil(usuario) {
+  return usuario?.perfil || usuario?.Perfil || '';
+}
+export function userSetor(usuario) {
+  return usuario?.setor || usuario?.Setor || '';
+}
+export function isAdmin(usuario) {
+  const p = perfil(usuario);
+  return p === 'administrador' || p === 'admin';
+}
+
+export function exibirSetor(s) {
+  return ({
+    qualidade: 'Garantia de Validação',
+    engenharia: 'Mecatrônica',
+    producao: 'Operação',
+  })[String(s || '').toLowerCase()] || s || '—';
+}
+
+export function setorParaApi(label) {
+  return ({
+    'Garantia de Validação': 'Qualidade',
+    'Mecatrônica': 'Engenharia',
+    'Operação': 'Producao',
+  })[label] || label;
+}
+
+export function ordemStatus(s) {
+  return ({
+    aguardandoassinaturas: 0,
+    aguardandovalidacao: 1,
+    concluida: 2,
+    cancelada: 3,
+  })[String(s || '').toLowerCase()] ?? 0;
+}
+
+export function statusInfo(s) {
+  const map = {
+    aguardandoassinaturas: { cls: 'badge-yellow', label: 'Ag. Assinaturas', bg: '#fff4cd', color: '#a05a00', border: '#fbbf24', icon: '⏳' },
+    aguardandovalidacao:   { cls: 'badge-blue',   label: 'Ag. Validação',   bg: '#dce9ff', color: '#1E50A0', border: '#3C82D2', icon: '🔵' },
+    concluida:             { cls: 'badge-green',  label: 'Concluída',       bg: '#dcffe8', color: '#00824a', border: '#28AA5A', icon: '✅' },
+    cancelada:             { cls: 'badge-red',    label: 'Cancelada',       bg: '#ffdede', color: '#aa1e1e', border: '#D23C3C', icon: '❌' },
+  };
+  return map[String(s || '').toLowerCase()] || { cls: 'badge-gray', label: s || '—', bg: '#ebebeb', color: '#555', border: '#ccc', icon: '❓' };
+}
+
+export function jaAssinou(osc, usuario) {
+  const s = String(userSetor(usuario) || '').toLowerCase();
+  if (s === 'qualidade')  return osc.qualidadeAssinou;
+  if (s === 'engenharia') return osc.engenhariaAssinou;
+  if (s === 'producao')   return osc.producaoAssinou;
+  return false;
+}
+
+export function totalAssinaturas(osc) {
+  return (osc.qualidadeAssinou ? 1 : 0) + (osc.engenhariaAssinou ? 1 : 0) + (osc.producaoAssinou ? 1 : 0);
+}
+</file>
+
+<file path="src/App.jsx">
+import { useState, useEffect, Component } from 'react';
+import { getUsuario, clearAuth, isAuthenticated, perfil, isAdmin, userName, userPerfil } from './api';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import CriarOSPage from './pages/CriarOSPage';
+import AssinarPage from './pages/AssinarPage';
+import GerenciarOSsPage from './pages/GerenciarOSsPage';
+import UsuariosPage from './pages/UsuariosPage';
+import ExportarPage from './pages/ExportarPage';
+import AlertToast from './components/AlertToast';
+
+class ErrorBoundary extends Component {
+  state = { erro: false };
+  static getDerivedStateFromError() { return { erro: true }; }
+  render() {
+    if (this.state.erro)
+      return (
+        <div style={{ padding: 40, textAlign: 'center', color: '#b91c1c' }}>
+          <p style={{ fontSize: 16, marginBottom: 12 }}>⚠️ Algo deu errado ao carregar esta página.</p>
+          <button
+            style={{ padding: '8px 20px', background: '#1E50A0', color: '#fff', border: 'none', borderRadius: 7, cursor: 'pointer', fontSize: 14 }}
+            onClick={() => { this.setState({ erro: false }); window.location.reload(); }}
+          >
+            🔄 Recarregar
+          </button>
+        </div>
+      );
+    return this.props.children;
+  }
+}
+
+export default function App() {
+  const [loggedIn, setLoggedIn] = useState(isAuthenticated());
+  const [usuario, setUsuario] = useState(getUsuario());
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [alert, setAlert] = useState(null);
+
+  function handleLogin() {
+    setUsuario(getUsuario());
+    setLoggedIn(true);
+    setCurrentPage('dashboard');
+  }
+
+  function handleLogout() {
+    if (confirm('Deseja sair da conta?')) {
+      clearAuth();
+      setLoggedIn(false);
+      setUsuario(null);
+    }
+  }
+
+  function showAlert(msg, type = 'error') {
+    setAlert({ msg, type });
+  }
+
+  function navigate(page) {
+    const p = perfil(usuario);
+    const admin = isAdmin(usuario);
+    if (page === 'criar'    && p !== 'emitente' && !admin) return;
+    if (page === 'assinar'  && p !== 'gerente') return;
+    if (page === 'usuarios' && !admin) return;
+    if (page === 'oscs'     && !admin) return;
+    setCurrentPage(page);
+    setSidebarOpen(false);
+  }
+
+  if (!loggedIn) {
+    return (
+      <ErrorBoundary>
+        <LoginPage onLogin={handleLogin} />
+      </ErrorBoundary>
+    );
+  }
+
+  const p = perfil(usuario);
+  const admin = isAdmin(usuario);
+
+  const navItems = [
+    { id: 'dashboard', label: '📈 Dashboard', locked: false },
+    { id: 'criar',     label: '➕ Criar OS',  locked: p !== 'emitente' && !admin, tip: '⛔ Sem acesso' },
+    { id: 'assinar',   label: '✅ Assinar OS', locked: p !== 'gerente', tip: '⛔ Somente Gerentes' },
+    { id: 'usuarios',  label: '👥 Gerenciar Usuários', locked: !admin, tip: '⛔ Somente Admins' },
+    { id: 'oscs',      label: '🛠️ Gerenciar OSs', locked: !admin, tip: '⛔ Somente Admins' },
+    { id: 'exportar',  label: '📄 Exportar PDF', locked: false, extra: 'nav-btn-export' },
+  ];
+
+  const pages = {
+    dashboard: <DashboardPage usuario={usuario} showAlert={showAlert} />,
+    criar:     <CriarOSPage usuario={usuario} showAlert={showAlert} onNavigate={navigate} />,
+    assinar:   <AssinarPage usuario={usuario} showAlert={showAlert} />,
+    usuarios:  <UsuariosPage usuario={usuario} showAlert={showAlert} />,
+    oscs:      <GerenciarOSsPage usuario={usuario} showAlert={showAlert} />,
+    exportar:  <ExportarPage usuario={usuario} showAlert={showAlert} />,
+  };
+
+  return (
+    <ErrorBoundary>
+      <>
+        <div className="app-shell">
+          <div id="header">
+            <button className="btn-menu" onClick={() => setSidebarOpen(v => !v)}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+            <h1>📋 Gerenciador de Ordens de Serviço</h1>
+            <div className="header-right">
+              <span className="header-user">👤 {userName(usuario)} | {userPerfil(usuario)}</span>
+              <button className="btn-sair" onClick={handleLogout}>⬅ Sair</button>
+            </div>
+          </div>
+
+          <div className="app-body">
+            <div
+              className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
+              onClick={() => setSidebarOpen(false)}
+            />
+
+            <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+              {navItems.map(item => (
+                <button
+                  key={item.id}
+                  className={`nav-btn ${item.extra || ''} ${currentPage === item.id ? 'active' : ''} ${item.locked ? 'disabled' : ''}`}
+                  onClick={() => !item.locked && navigate(item.id)}
+                  data-tip={item.locked ? item.tip : undefined}
+                >
+                  {item.label}
+                </button>
+              ))}
+              <a
+                className="nav-btn nav-btn-download"
+                href="Gerenciador-OS.zip"
+                download
+                title="Baixar o aplicativo desktop"
+              >
+                💾 Baixar App Desktop
+              </a>
+            </nav>
+
+            <main className="content">
+              {alert && (
+                <AlertToast
+                  message={alert.msg}
+                  type={alert.type}
+                  onDismiss={() => setAlert(null)}
+                />
+              )}
+              {pages[currentPage]}
+            </main>
+          </div>
+        </div>
+
+        <div id="print-area" />
+      </>
+    </ErrorBoundary>
+  );
+}
+</file>
+
+<file path="src/components/AlertToast.jsx">
+import { useEffect } from 'react';
+
+export default function AlertToast({ message, type = 'error', onDismiss }) {
+  useEffect(() => {
+    const t = setTimeout(onDismiss, 4000);
+    return () => clearTimeout(t);
+  }, [message]);
+
+  const style = type === 'success'
+    ? { background: '#f0fdf4', border: '1px solid #86efac', color: '#15803d' }
+    : { background: '#fef2f2', border: '1px solid #fca5a5', color: '#b91c1c' };
+
+  return (
+    <div className="alert-inline" style={style}>
+      {message}
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/Modal.jsx">
+export default function Modal({ children, onClose }) {
+  return (
+    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal">
+        {children}
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/OSDetailPanel.jsx">
+import { statusInfo, totalAssinaturas, jaAssinou } from '../api';
+import { StatusBadge } from './UI';
+
+export default function OSDetailPanel({ os, usuario, onClose, onAssinar }) {
+  if (!os) return null;
+
+  const dt = os.dataEmissao ? new Date(os.dataEmissao).toLocaleString('pt-BR') : '—';
+  const jaSig = jaAssinou(os, usuario);
+  const total = totalAssinaturas(os);
+
+  const sigItems = [
+    { label: 'Garantia Val.', signed: os.qualidadeAssinou },
+    { label: 'Mecatrônica',   signed: os.engenhariaAssinou },
+    { label: 'Operação',      signed: os.producaoAssinou },
+  ];
+
+  return (
+    <div className="os-detail-panel open">
+      <div className="panel-header">
+        <h3>OS-{String(os.id).padStart(3, '0')}</h3>
+        <button className="btn-close-panel" onClick={onClose} title="Fechar">✕</button>
+      </div>
+
+      <div className="panel-body">
+        <div className="detail-section">
+          <div className="detail-section-title">Identificação</div>
+          <div className="detail-row">
+            <span className="dl">Número</span>
+            <span className="dv">OS-{String(os.id).padStart(3, '0')}</span>
+          </div>
+          <div className="detail-row">
+            <span className="dl">Status</span>
+            <span className="dv"><StatusBadge status={os.status} /></span>
+          </div>
+          <div className="detail-row">
+            <span className="dl">Data de Emissão</span>
+            <span className="dv">{dt}</span>
+          </div>
+          <div className="detail-row">
+            <span className="dl">Emitente</span>
+            <span className="dv">{os.emitenteNome || '—'}</span>
+          </div>
+        </div>
+
+        <div className="detail-section">
+          <div className="detail-section-title">Informações</div>
+          <div className="detail-row">
+            <span className="dl">Equipamento</span>
+            <span className="dv">{os.equipamento || '—'}</span>
+          </div>
+          <div className="detail-row">
+            <span className="dl">Descrição</span>
+            <span className="dv texto">{os.descricao || '—'}</span>
+          </div>
+          <div className="detail-row">
+            <span className="dl">Ação Tomada</span>
+            <span className="dv texto">{os.acaoTomada || '—'}</span>
+          </div>
+        </div>
+
+        <div className="detail-section">
+          <div className="detail-section-title">Assinaturas</div>
+          <div className="sig-grid">
+            {sigItems.map((s) => (
+              <div key={s.label} className={`sig-item ${s.signed ? 'signed' : 'pending'}`}>
+                <div className="si-label">{s.label}</div>
+                <div className="si-icon">{s.signed ? '✅' : '⏳'}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="panel-footer">
+        {jaSig ? (
+          <button className="btn-sign" disabled>✅ Seu setor já assinou</button>
+        ) : (
+          <button className="btn-sign" onClick={() => onAssinar(os)}>
+            ✍️ Assinar esta OS
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/UI.jsx">
+import { statusInfo, totalAssinaturas } from '../api';
+
+export function StatusBadge({ status }) {
+  const info = statusInfo(status);
+  return <span className={`badge ${info.cls}`}>{info.label}</span>;
+}
+
+export function SignaturesBadge({ osc }) {
+  const total = totalAssinaturas(osc);
+  const cls = total === 3 ? 'badge-green' : total > 0 ? 'badge-yellow' : 'badge-red';
+  const q = osc.qualidadeAssinou ? '✅' : '⏳';
+  const e = osc.engenhariaAssinou ? '✅' : '⏳';
+  const p = osc.producaoAssinou ? '✅' : '⏳';
+  return (
+    <>
+      <span className={`badge ${cls}`}>{total}/3</span>{' '}
+      <small style={{ color: '#888' }}>G{q}M{e}O{p}</small>
+    </>
+  );
+}
+
+export function Spinner() {
+  return (
+    <div className="loading">
+      <div className="spinner" />
+      Carregando...
+    </div>
+  );
+}
+
+export function Empty({ children }) {
+  return <div className="empty">{children}</div>;
+}
+</file>
+
+<file path="src/main.jsx">
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './styles.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <App />
+)
+</file>
+
+<file path="src/pages/AssinarPage.jsx">
+import { useState, useEffect } from 'react';
+import { api, userId, userSetor, exibirSetor, userName, jaAssinou, totalAssinaturas, URL_BASE, getToken } from '../api';
+import { SignaturesBadge, Spinner, Empty } from '../components/UI';
+import OSDetailPanel from '../components/OSDetailPanel';
+
+export default function AssinarPage({ usuario, showAlert }) {
+  const [oscs, setOscs] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busca, setBusca] = useState('');
+  const [progFilter, setProgFilter] = useState('');
+  const [selectedOs, setSelectedOs] = useState(null);
+
+  useEffect(() => { loadOscs(); }, []);
+
+  useEffect(() => {
+    const b = busca.trim().toLowerCase();
+    const f = oscs.filter(o => {
+      const okB = !b || (o.descricao || '').toLowerCase().includes(b) || (o.equipamento || '').toLowerCase().includes(b);
+      const total = totalAssinaturas(o);
+      return okB && (progFilter === '' || total === parseInt(progFilter));
+    });
+    setFiltered(f);
+  }, [busca, progFilter, oscs]);
+
+  async function loadOscs() {
+    setLoading(true); setError('');
+    try {
+      const r = await api('GET', `/osc/gerente/${userId(usuario)}`);
+      if (!r.ok) { setError(`Erro ${r.status}`); return; }
+      setOscs(await r.json() || []);
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }
+
+  async function assinarOS(os) {
+    if (!confirm(`Confirma assinatura da OS-${String(os.id).padStart(3, '0')}?\n\n${os.descricao}`)) return;
+    try {
+      const r = await fetch(`${URL_BASE}/osc/${os.id}/assinar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+        body: String(userId(usuario)),
+      });
+      if (r.ok) {
+        showAlert('OS assinada com sucesso!', 'success');
+        setSelectedOs(null);
+        loadOscs();
+      } else if (r.status === 401) {
+        showAlert('Sem permissão para assinar.');
+      } else {
+        showAlert(`Erro: ${await r.text()}`);
+      }
+    } catch (e) { showAlert(`Erro: ${e.message}`); }
+  }
+
+  function toggleDetail(os) {
+    setSelectedOs(prev => prev?.id === os.id ? null : os);
+  }
+
+  const setor = exibirSetor(userSetor(usuario));
+
+  return (
+    <div className={selectedOs ? 'panel-open' : ''} style={{ position: 'relative' }}>
+      {selectedOs && (
+        <OSDetailPanel
+          os={selectedOs}
+          usuario={usuario}
+          onClose={() => setSelectedOs(null)}
+          onAssinar={assinarOS}
+        />
+      )}
+
+      <div className="page-title">Assinar OS</div>
+      <div className="page-sub">
+        OSs pendentes — {setor} · {userName(usuario)}{' '}
+        <span style={{ fontSize: 12, color: '#aaa' }}>· clique em uma linha para ver detalhes</span>
+      </div>
+
+      <div className="filter-bar">
+        <input placeholder="🔍 Buscar..." value={busca} onChange={e => setBusca(e.target.value)} />
+        <select value={progFilter} onChange={e => setProgFilter(e.target.value)}>
+          <option value="">Todos os progressos</option>
+          <option value="0">0 assinaturas</option>
+          <option value="1">1 assinatura</option>
+          <option value="2">2 assinaturas</option>
+        </select>
+        <button className="btn-clear" onClick={() => { setBusca(''); setProgFilter(''); }}>✖ Limpar</button>
+      </div>
+
+      {loading ? <Spinner /> : error ? <div className="empty" style={{ color: 'red' }}>{error}</div> : (
+        filtered.length === 0 ? (
+          <Empty>✅ Nenhuma OS pendente para o seu setor.</Empty>
+        ) : (
+          <div className="table-wrap">
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: 50 }}>ID</th>
+                    <th>Descrição</th>
+                    <th>Equipamento</th>
+                    <th>Progresso</th>
+                    <th>Status minha ass.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(o => {
+                    const total = totalAssinaturas(o);
+                    const cls = total === 3 ? 'badge-green' : total > 0 ? 'badge-yellow' : 'badge-red';
+                    const jaSig = jaAssinou(o, usuario);
+                    const selected = selectedOs?.id === o.id;
+                    return (
+                      <tr key={o.id} className={`clickable ${selected ? 'row-selected' : ''}`} onClick={() => toggleDetail(o)}>
+                        <td><strong>{o.id}</strong></td>
+                        <td>{o.descricao || ''}</td>
+                        <td>{o.equipamento || ''}</td>
+                        <td><span className={`badge ${cls}`}>{total}/3</span></td>
+                        <td>{jaSig ? <span className="badge badge-green">✅ Assinado</span> : <span className="badge badge-yellow">⏳ Pendente</span>}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+</file>
+
+<file path="src/pages/CriarOSPage.jsx">
+import { useState } from 'react';
+import { api, userId } from '../api';
+
+export default function CriarOSPage({ usuario, showAlert, onNavigate }) {
+  const [desc, setDesc] = useState('');
+  const [equip, setEquip] = useState('');
+  const [acao, setAcao] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function salvarOS() {
+    if (!desc) { alert('Informe a descrição!'); return; }
+    if (!equip) { alert('Informe o equipamento!'); return; }
+    if (!acao) { alert('Informe a ação tomada!'); return; }
+
+    setLoading(true);
+    try {
+      const r = await api('POST', '/osc', { descricao: desc, equipamento: equip, acaoTomada: acao, usuarioLogadoId: userId(usuario) });
+      if (r.ok) {
+        showAlert('OS criada com sucesso!', 'success');
+        onNavigate('dashboard');
+      } else {
+        showAlert(`Erro: ${r.status} — ${await r.text()}`);
+      }
+    } catch (e) {
+      showAlert(`Erro: ${e.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div>
+      <div className="page-title">Criar Nova OS</div>
+      <div className="page-sub">Preencha os campos para criar uma nova Ordem de Serviço</div>
+      <div className="form-section">
+        <div className="form-group">
+          <label>Descrição</label>
+          <input placeholder="Descreva a ordem de serviço..." value={desc} onChange={e => setDesc(e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label>Equipamento</label>
+          <input placeholder="Nome ou código do equipamento..." value={equip} onChange={e => setEquip(e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label>Ação Tomada</label>
+          <textarea placeholder="Descreva a ação tomada..." value={acao} onChange={e => setAcao(e.target.value)} />
+        </div>
+        <button className="btn-primary" onClick={salvarOS} disabled={loading}>
+          {loading ? '⏳ Salvando...' : '💾 Salvar OS'}
+        </button>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/pages/DashboardPage.jsx">
+import { useState, useEffect, useRef } from 'react';
+import { Chart, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, DoughnutController, BarController } from 'chart.js';
+import { api, perfil, userId, userSetor, exibirSetor, ordemStatus, jaAssinou, statusInfo, totalAssinaturas } from '../api';
+import { StatusBadge, SignaturesBadge, Spinner, Empty } from '../components/UI';
+import OSDetailPanel from '../components/OSDetailPanel';
+import AlertToast from '../components/AlertToast';
+
+Chart.register(DoughnutController, BarController, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
+function SummaryPanel({ lista }) {
+  const counts = { aguardandoassinaturas: 0, aguardandovalidacao: 0, concluida: 0, cancelada: 0 };
+  lista.forEach(o => { const k = String(o.status || '').toLowerCase(); if (k in counts) counts[k]++; });
+  return (
+    <div className="summary-card">
+      <h3>Resumo</h3>
+      <div className="summary-item"><span className="lbl">Total</span><span className="val" style={{ color: '#19234a' }}>{lista.length}</span></div>
+      <div className="summary-item"><span className="lbl">Ag. Assinaturas</span><span className="val" style={{ color: '#a05a00' }}>{counts.aguardandoassinaturas}</span></div>
+      <div className="summary-item"><span className="lbl">Ag. Validação</span><span className="val" style={{ color: '#1E50A0' }}>{counts.aguardandovalidacao}</span></div>
+      <div className="summary-item"><span className="lbl">Concluídas</span><span className="val" style={{ color: '#00824a' }}>{counts.concluida}</span></div>
+      <div className="summary-item"><span className="lbl">Canceladas</span><span className="val" style={{ color: '#aa1e1e' }}>{counts.cancelada}</span></div>
+    </div>
+  );
+}
+
+function Charts({ lista }) {
+  const pieRef = useRef(null);
+  const barRef = useRef(null);
+  const pieChart = useRef(null);
+  const barChart = useRef(null);
+
+  useEffect(() => {
+  if (!pieRef.current || !barRef.current) return;
+
+  const counts = { aguardandoassinaturas: 0, aguardandovalidacao: 0, concluida: 0, cancelada: 0 };
+  lista.forEach(o => { const k = String(o.status || '').toLowerCase(); if (k in counts) counts[k]++; });
+  const sigs = [0, 1, 2, 3].map(n => lista.filter(o => totalAssinaturas(o) === n).length);
+
+  // ✅ CORREÇÃO: destruir E limpar a referência antes de recriar
+  if (pieChart.current) { pieChart.current.destroy(); pieChart.current = null; }
+  if (barChart.current) { barChart.current.destroy(); barChart.current = null; }
+
+  pieChart.current = new Chart(pieRef.current, {
+    type: 'doughnut',
+    data: {
+      labels: ['Ag. Assinaturas', 'Ag. Validação', 'Concluída', 'Cancelada'],
+      datasets: [{ data: Object.values(counts), backgroundColor: ['#FFC33C', '#3C82D2', '#28AA5A', '#D23C3C'], borderWidth: 2, borderColor: '#fff' }],
+    },
+    options: { plugins: { legend: { position: 'right', labels: { font: { size: 10 }, boxWidth: 10 } } }, cutout: '55%', responsive: true, maintainAspectRatio: false },
+  });
+
+  barChart.current = new Chart(barRef.current, {
+    type: 'bar',
+    data: {
+      labels: ['0 ass.', '1 ass.', '2 ass.', 'Todas'],
+      datasets: [{ data: sigs, backgroundColor: ['#D23C3C', '#D28228', '#FFC33C', '#28AA5A'], borderRadius: 4 }],
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, responsive: true, maintainAspectRatio: false },
+  });
+
+  return () => {
+    // ✅ CORREÇÃO: limpar referência no cleanup também
+    if (pieChart.current) { pieChart.current.destroy(); pieChart.current = null; }
+    if (barChart.current) { barChart.current.destroy(); barChart.current = null; }
+  };
+}, [lista]);
+
+  return (
+    <div className="charts-row">
+      <div className="chart-card">
+        <h3>Status das OSs</h3>
+        <div style={{ height: 160 }}><canvas ref={pieRef} /></div>
+      </div>
+      <div className="chart-card">
+        <h3>Progresso de Assinaturas</h3>
+        <div style={{ height: 160 }}><canvas ref={barRef} /></div>
+      </div>
+      <SummaryPanel lista={lista} />
+    </div>
+  );
+}
+
+export default function DashboardPage({ usuario, showAlert }) {
+  const [allOscs, setAllOscs] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busca, setBusca] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedOs, setSelectedOs] = useState(null);
+
+  const p = perfil(usuario);
+  const isGer = p === 'gerente';
+  const urlOsc = p === 'emitente' ? `/osc/emitente/${userId(usuario)}` : `/osc`;
+  const subtitulo = p === 'emitente' ? 'Suas OSs criadas' : p === 'gerente' ? `OSs do setor ${exibirSetor(userSetor(usuario))}` : 'Todas as OSs';
+
+  useEffect(() => {
+    loadOscs();
+  }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [busca, statusFilter, allOscs]);
+
+  async function loadOscs() {
+    setLoading(true); setError('');
+    try {
+      const r = await api('GET', urlOsc);
+      if (!r.ok) { setError(`Erro ${r.status}`); return; }
+      const data = (await r.json() || []).sort((a, b) => ordemStatus(a.status) - ordemStatus(b.status) || b.id - a.id);
+      setAllOscs(data);
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }
+
+  function applyFilters() {
+    const b = busca.trim().toLowerCase();
+    const f = allOscs.filter(o => {
+      const okB = !b || (o.descricao || '').toLowerCase().includes(b) || (o.equipamento || '').toLowerCase().includes(b) || (o.emitenteNome || '').toLowerCase().includes(b);
+      const okS = !statusFilter || String(o.status || '').toLowerCase() === statusFilter.toLowerCase();
+      return okB && okS;
+    });
+    setFiltered(f);
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      {selectedOs && (
+        <OSDetailPanel
+          os={selectedOs}
+          usuario={usuario}
+          onClose={() => setSelectedOs(null)}
+          onAssinar={() => {}} // read-only in dashboard
+        />
+      )}
+
+      <div className="page-title">Dashboard</div>
+      <div className="page-sub">{subtitulo}</div>
+
+      {loading ? <Spinner /> : error ? <div className="empty" style={{ color: 'red' }}>{error}</div> : (
+        <>
+          <Charts lista={filtered} />
+
+          <div className="filter-bar">
+            <input placeholder="🔍 Descrição ou equipamento..." value={busca} onChange={e => setBusca(e.target.value)} />
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+              <option value="">Todos os status</option>
+              <option value="AguardandoAssinaturas">Ag. Assinaturas</option>
+              <option value="AguardandoValidacao">Ag. Validação</option>
+              <option value="Concluida">Concluída</option>
+              <option value="Cancelada">Cancelada</option>
+            </select>
+            <button className="btn-clear" onClick={() => { setBusca(''); setStatusFilter(''); }}>✖ Limpar</button>
+          </div>
+
+          {filtered.length === 0 ? (
+            <Empty>Nenhuma OS encontrada.</Empty>
+          ) : (
+            <div className="table-wrap">
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style={{ width: 50 }}>ID</th>
+                      <th>Descrição</th>
+                      <th>Equipamento</th>
+                      <th>Emitente</th>
+                      <th>Data</th>
+                      <th>Status</th>
+                      <th>Ass.</th>
+                      {isGer && <th>Minha ass.</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map(o => {
+                      const dt = o.dataEmissao ? new Date(o.dataEmissao).toLocaleDateString('pt-BR') : '—';
+                      const selected = selectedOs?.id === o.id;
+                      return (
+                        <tr key={o.id} className={`clickable ${selected ? 'row-selected' : ''}`} onClick={() => setSelectedOs(selected ? null : o)}>
+                          <td><strong>{o.id}</strong></td>
+                          <td>{o.descricao || ''}</td>
+                          <td>{o.equipamento || ''}</td>
+                          <td>{o.emitenteNome || ''}</td>
+                          <td>{dt}</td>
+                          <td><StatusBadge status={o.status} /></td>
+                          <td><SignaturesBadge osc={o} /></td>
+                          {isGer && <td>{jaAssinou(o, usuario) ? <span className="badge badge-green">✅</span> : <span className="badge badge-yellow">⏳</span>}</td>}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+</file>
+
+<file path="src/pages/ExportarPage.jsx">
+import { useState, useEffect } from 'react';
+import { api, perfil, userId, userName, ordemStatus, statusInfo, totalAssinaturas } from '../api';
+import { Spinner, Empty } from '../components/UI';
+
+function dotClass(status) {
+  const s = String(status || '').toLowerCase();
+  if (s === 'concluida') return 'dot-green';
+  if (s === 'cancelada') return 'dot-red';
+  if (s === 'aguardandovalidacao') return 'dot-blue';
+  return 'dot-yellow';
+}
+
+const STATUS_LABELS = {
+  aguardandoassinaturas: 'Ag. Assinaturas',
+  aguardandovalidacao: 'Ag. Validação',
+  concluida: 'Concluída',
+  cancelada: 'Cancelada',
+};
+
+export default function ExportarPage({ usuario }) {
+  const [oscs, setOscs] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busca, setBusca] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selected, setSelected] = useState(new Set());
+
+  useEffect(() => { loadOscs(); }, []);
+
+  useEffect(() => {
+    const b = busca.trim().toLowerCase();
+    const f = oscs.filter(o => {
+      const okB = !b || (o.descricao || '').toLowerCase().includes(b) || (o.equipamento || '').toLowerCase().includes(b) || (o.emitenteNome || '').toLowerCase().includes(b);
+      const okS = !statusFilter || String(o.status || '').toLowerCase() === statusFilter;
+      return okB && okS;
+    });
+    setFiltered(f);
+    // Reset selection when filter changes
+    setSelected(new Set());
+  }, [busca, statusFilter, oscs]);
+
+  async function loadOscs() {
+    setLoading(true); setError('');
+    try {
+      const p = perfil(usuario);
+      const url = p === 'emitente' ? `/osc/emitente/${userId(usuario)}` : `/osc`;
+      const r = await api('GET', url);
+      if (!r.ok) { setError(`Erro ${r.status}`); return; }
+      const data = (await r.json() || []).sort((a, b) => ordemStatus(a.status) - ordemStatus(b.status) || b.id - a.id);
+      setOscs(data);
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }
+
+  function toggleItem(id) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll(checked) {
+    if (checked) setSelected(new Set(filtered.map(o => o.id)));
+    else setSelected(new Set());
+  }
+
+  function sigRow(label, assinou) {
+    return `<tr>
+      <td style="padding:7px 12px;font-size:12px;color:#374151;border-bottom:1px solid #f0f2f6">${label}</td>
+      <td style="padding:7px 12px;font-size:13px;font-weight:700;border-bottom:1px solid #f0f2f6;color:${assinou ? '#166534' : '#92400e'}">
+        ${assinou ? '✅ Assinado' : '⏳ Pendente'}
+      </td>
+    </tr>`;
+  }
+
+  function gerarPDF() {
+    const oscsExport = filtered.filter(o => selected.has(o.id));
+    if (!oscsExport.length) return;
+
+    const agora = new Date();
+    const dtExport = agora.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const hrExport = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const exportadoPor = userName(usuario);
+
+    function info(s) {
+      const k = String(s || '').toLowerCase();
+      const map = {
+        concluida:             { label: 'CONCLUÍDA',        color: '#166534', bg: '#dcfce7', border: '#86efac', icon: '✅' },
+        cancelada:             { label: 'CANCELADA',         color: '#991b1b', bg: '#fee2e2', border: '#fca5a5', icon: '❌' },
+        aguardandovalidacao:   { label: 'AG. VALIDAÇÃO',     color: '#1e40af', bg: '#dbeafe', border: '#93c5fd', icon: '🔵' },
+        aguardandoassinaturas: { label: 'AG. ASSINATURAS',   color: '#92400e', bg: '#fef3c7', border: '#fcd34d', icon: '⚠️' },
+      };
+      return map[k] || { label: s || '—', color: '#374151', bg: '#f3f4f6', border: '#d1d5db', icon: '' };
+    }
+
+    const coverHTML = `
+      <div class="pdf-cover">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:40px">
+          <div>
+            <div style="font-size:28px;font-weight:800;color:#1E50A0;margin-bottom:6px">📋 Relatório de Ordens de Serviço</div>
+            <div style="font-size:14px;color:#6b7280">Gerenciador de OS — Relatório exportado</div>
+          </div>
+          <div style="text-align:right;font-size:12px;color:#6b7280;line-height:1.7">
+            <div><strong>Data:</strong> ${dtExport}</div>
+            <div><strong>Horário:</strong> ${hrExport}</div>
+            <div><strong>Exportado por:</strong> ${exportadoPor}</div>
+          </div>
+        </div>
+        <hr style="border:none;border-top:2px solid #1E50A0;margin-bottom:32px"/>
+        <div style="margin-bottom:24px">
+          <div style="font-size:16px;font-weight:700;color:#19234a;margin-bottom:16px">Resumo</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+            ${[
+              { label: 'Total', val: oscsExport.length, color: '#19234a' },
+              { label: 'Concluídas', val: oscsExport.filter(o => String(o.status || '').toLowerCase() === 'concluida').length, color: '#166534' },
+              { label: 'Canceladas', val: oscsExport.filter(o => String(o.status || '').toLowerCase() === 'cancelada').length, color: '#991b1b' },
+              { label: 'Pendentes', val: oscsExport.filter(o => !['concluida', 'cancelada'].includes(String(o.status || '').toLowerCase())).length, color: '#92400e' },
+            ].map(c => `<div style="background:#f9fafb;border:1px solid #e5e9f0;border-radius:10px;padding:16px;text-align:center">
+              <div style="font-size:28px;font-weight:800;color:${c.color}">${c.val}</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:4px">${c.label}</div>
+            </div>`).join('')}
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:#1e1e1e">
+            <th style="color:#fff;padding:8px 10px;text-align:left">#</th>
+            <th style="color:#fff;padding:8px 10px;text-align:left">OS</th>
+            <th style="color:#fff;padding:8px 10px;text-align:left">Equipamento</th>
+            <th style="color:#fff;padding:8px 10px;text-align:left">Emitente</th>
+            <th style="color:#fff;padding:8px 10px;text-align:left">Status</th>
+            <th style="color:#fff;padding:8px 10px;text-align:left">Ass.</th>
+          </tr></thead>
+          <tbody>
+            ${oscsExport.map((o, i) => {
+              const inf = info(o.status);
+              const tot = totalAssinaturas(o);
+              return `<tr style="background:${i % 2 === 0 ? '#fff' : '#f9fafb'}">
+                <td style="padding:7px 10px;color:#888">${i + 1}</td>
+                <td style="padding:7px 10px;font-weight:700;color:#1E50A0">OS-${String(o.id).padStart(3, '0')}</td>
+                <td style="padding:7px 10px">${o.equipamento || '—'}</td>
+                <td style="padding:7px 10px">${o.emitenteNome || '—'}</td>
+                <td style="padding:7px 10px"><span style="background:${inf.bg};color:${inf.color};border:1px solid ${inf.border};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${inf.label}</span></td>
+                <td style="padding:7px 10px;font-weight:700;color:${tot === 3 ? '#166534' : tot > 0 ? '#92400e' : '#991b1b'}">${tot}/3</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+        <div style="margin-top:40px;padding-top:16px;border-top:1px solid #e5e9f0;font-size:11px;color:#9ca3af;text-align:center">
+          Documento gerado automaticamente pelo Gerenciador de OS em ${dtExport} às ${hrExport}
+        </div>
+      </div>`;
+
+    const osPages = oscsExport.map(o => {
+      const inf = info(o.status);
+      const tot = totalAssinaturas(o);
+      const dt = o.dataEmissao ? new Date(o.dataEmissao).toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' }) : '—';
+      return `
+        <div class="pdf-os">
+          <div style="background:${inf.bg};border:2px solid ${inf.border};border-radius:10px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px">
+            <span style="font-size:32px">${inf.icon}</span>
+            <div>
+              <div style="font-size:20px;font-weight:800;color:${inf.color}">${inf.label}</div>
+              <div style="font-size:12px;color:${inf.color};opacity:.75;margin-top:2px">${tot}/3 assinaturas · OS-${String(o.id).padStart(3, '0')}</div>
+            </div>
+            <div style="margin-left:auto;text-align:right;font-size:11px;color:#6b7280;line-height:1.8">
+              <div><strong>Exportado em:</strong> ${dtExport}</div><div><strong>Horário:</strong> ${hrExport}</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #e5e9f0">
+            <div>
+              <div style="font-size:22px;font-weight:800;color:#1E50A0">OS-${String(o.id).padStart(3, '0')}</div>
+              <div style="font-size:13px;color:#6b7280;margin-top:2px">Ordem de Serviço</div>
+            </div>
+            <div style="text-align:right;font-size:12px;color:#6b7280;line-height:1.9">
+              <div><strong>Data de Emissão:</strong> ${dt}</div>
+              <div><strong>Emitente:</strong> ${o.emitenteNome || '—'}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+            <div style="background:#f9fafb;border:1px solid #e5e9f0;border-radius:8px;padding:14px">
+              <div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Equipamento</div>
+              <div style="font-size:14px;font-weight:600">${o.equipamento || '—'}</div>
+            </div>
+            <div style="background:#f9fafb;border:1px solid #e5e9f0;border-radius:8px;padding:14px">
+              <div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Status</div>
+              <div style="font-size:14px;font-weight:700;color:${inf.color}">${inf.label}</div>
+            </div>
+          </div>
+          <div style="background:#f9fafb;border:1px solid #e5e9f0;border-radius:8px;padding:14px;margin-bottom:16px">
+            <div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Descrição</div>
+            <div style="font-size:13px;line-height:1.6;white-space:pre-wrap">${o.descricao || '—'}</div>
+          </div>
+          <div style="background:#f9fafb;border:1px solid #e5e9f0;border-radius:8px;padding:14px;margin-bottom:20px">
+            <div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Ação Tomada</div>
+            <div style="font-size:13px;line-height:1.6;white-space:pre-wrap">${o.acaoTomada || '—'}</div>
+          </div>
+          <div style="border:1px solid #e5e9f0;border-radius:8px;overflow:hidden;margin-bottom:20px">
+            <div style="background:#1e1e1e;padding:10px 14px"><span style="color:#fff;font-size:12px;font-weight:700">ASSINATURAS (${tot}/3)</span></div>
+            <table style="width:100%;border-collapse:collapse">
+              <thead><tr style="background:#f9fafb">
+                <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:1px solid #e5e9f0">Setor</th>
+                <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:1px solid #e5e9f0">Status</th>
+              </tr></thead>
+              <tbody>
+                ${sigRow('Garantia de Validação (Qualidade)', o.qualidadeAssinou)}
+                ${sigRow('Mecatrônica (Engenharia)', o.engenhariaAssinou)}
+                ${sigRow('Operação (Produção)', o.producaoAssinou)}
+              </tbody>
+            </table>
+          </div>
+          <div style="padding-top:12px;border-top:1px solid #e5e9f0;font-size:10px;color:#9ca3af;display:flex;justify-content:space-between">
+            <span>Gerenciador de OS — Documento gerado automaticamente</span>
+            <span>OS-${String(o.id).padStart(3, '0')} · ${dtExport} · ${hrExport}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    const printArea = document.getElementById('print-area');
+    printArea.innerHTML = coverHTML + osPages;
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => { printArea.innerHTML = ''; }, 1000);
+    }, 150);
+  }
+
+  const allChecked = filtered.length > 0 && filtered.every(o => selected.has(o.id));
+  const someChecked = filtered.some(o => selected.has(o.id));
+
+  return (
+    <div>
+      <div className="page-title">📄 Exportar OSs como PDF</div>
+      <div className="page-sub">Selecione as OSs que deseja exportar e clique em Gerar PDF</div>
+
+      <div className="filter-bar">
+        <input placeholder="🔍 Buscar por descrição ou equipamento..." value={busca} onChange={e => setBusca(e.target.value)} />
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+          <option value="">Todos os status</option>
+          <option value="aguardandoassinaturas">Ag. Assinaturas</option>
+          <option value="aguardandovalidacao">Ag. Validação</option>
+          <option value="concluida">Concluída</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+        <button className="btn-clear" onClick={() => { setBusca(''); setStatusFilter(''); }}>✖ Limpar</button>
+      </div>
+
+      {loading ? <Spinner /> : error ? <div className="empty" style={{ color: 'red' }}>{error}</div> : (
+        filtered.length === 0 ? <Empty>Nenhuma OS encontrada.</Empty> : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+              <label className="export-select-all" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={allChecked}
+                  ref={el => { if (el) el.indeterminate = someChecked && !allChecked; }}
+                  onChange={e => toggleAll(e.target.checked)}
+                />
+                Selecionar todas
+                <span className="export-count">{selected.size} de {filtered.length} selecionadas</span>
+              </label>
+            </div>
+
+            <div className="table-wrap export-list">
+              {filtered.map(o => {
+                const s = String(o.status || '').toLowerCase();
+                const label = STATUS_LABELS[s] || o.status || '—';
+                const tot = totalAssinaturas(o);
+                const dt = o.dataEmissao ? new Date(o.dataEmissao).toLocaleDateString('pt-BR') : '—';
+                return (
+                  <label key={o.id} className="export-item" htmlFor={`chk-os-${o.id}`}>
+                    <input
+                      type="checkbox"
+                      id={`chk-os-${o.id}`}
+                      checked={selected.has(o.id)}
+                      onChange={() => toggleItem(o.id)}
+                    />
+                    <span className={`export-status-dot ${dotClass(o.status)}`} />
+                    <div className="export-item-info">
+                      <div className="export-item-title">OS-{String(o.id).padStart(3, '0')} — {o.descricao || ''}</div>
+                      <div className="export-item-sub">{o.equipamento || '—'} · {o.emitenteNome || '—'} · {dt} · {label} · {tot}/3 ass.</div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 4, flexWrap: 'wrap' }}>
+              <button className="btn-export-pdf" disabled={selected.size === 0} onClick={gerarPDF}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                </svg>
+                Gerar PDF
+              </button>
+            </div>
+          </>
+        )
+      )}
+    </div>
+  );
+}
+</file>
+
+<file path="src/pages/GerenciarOSsPage.jsx">
+import { useState, useEffect } from 'react';
+import { api, userId, URL_BASE, getToken } from '../api';
+import { StatusBadge, SignaturesBadge, Spinner, Empty } from '../components/UI';
+
+export default function GerenciarOSsPage({ usuario, showAlert }) {
+  const [oscs, setOscs] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busca, setBusca] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  useEffect(() => { loadOscs(); }, []);
+
+  useEffect(() => {
+    const b = busca.trim().toLowerCase();
+    const f = oscs.filter(o => {
+      const okB = !b || (o.descricao || '').toLowerCase().includes(b) || (o.equipamento || '').toLowerCase().includes(b) || (o.emitenteNome || '').toLowerCase().includes(b);
+      const okS = !statusFilter || String(o.status || '').toLowerCase() === statusFilter;
+      return okB && okS;
+    });
+    setFiltered(f);
+  }, [busca, statusFilter, oscs]);
+
+  async function loadOscs() {
+    setLoading(true); setError('');
+    try {
+      const r = await api('GET', '/osc');
+      if (!r.ok) { setError(`Erro ${r.status}`); return; }
+      const all = await r.json() || [];
+      setOscs(all.filter(o => {
+        const s = String(o.status || '').toLowerCase();
+        return s === 'aguardandoassinaturas' || s === 'aguardandovalidacao';
+      }));
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }
+
+  async function acaoOsc(id, acao, desc) {
+    const msg = acao === 'concluir'
+      ? `Concluir OS-${String(id).padStart(3, '0')}?\n\n${desc}`
+      : `Cancelar OS-${String(id).padStart(3, '0')}? Não pode ser desfeito.\n\n${desc}`;
+    if (!confirm(msg)) return;
+    try {
+      const r = await fetch(`${URL_BASE}/osc/${id}/${acao}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+        body: String(userId(usuario)),
+      });
+      if (r.ok) {
+        showAlert(acao === 'concluir' ? 'OS concluída!' : 'OS cancelada!', 'success');
+        loadOscs();
+      } else {
+        showAlert(`Erro: ${await r.text()}`);
+      }
+    } catch (e) { showAlert(`Erro: ${e.message}`); }
+  }
+
+  return (
+    <div>
+      <div className="page-title">🛠️ Gerenciar OSs</div>
+      <div className="page-sub">Conclua ou cancele OSs ativas</div>
+
+      <div className="filter-bar">
+        <input placeholder="🔍 Buscar..." value={busca} onChange={e => setBusca(e.target.value)} />
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+          <option value="">Todos os status</option>
+          <option value="aguardandoassinaturas">Ag. Assinaturas</option>
+          <option value="aguardandovalidacao">Ag. Validação</option>
+        </select>
+        <button className="btn-clear" onClick={() => { setBusca(''); setStatusFilter(''); }}>✖ Limpar</button>
+      </div>
+
+      {loading ? <Spinner /> : error ? <div className="empty" style={{ color: 'red' }}>{error}</div> : (
+        filtered.length === 0 ? (
+          <Empty>Nenhuma OS ativa.</Empty>
+        ) : (
+          <div className="table-wrap">
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: 50 }}>ID</th>
+                    <th>Descrição</th>
+                    <th>Emitente</th>
+                    <th>Status</th>
+                    <th>Ass.</th>
+                    <th style={{ width: 160 }}>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(o => {
+                    const podeConc = String(o.status || '').toLowerCase() === 'aguardandovalidacao';
+                    return (
+                      <tr key={o.id}>
+                        <td><strong>{o.id}</strong></td>
+                        <td>{o.descricao || ''}</td>
+                        <td>{o.emitenteNome || ''}</td>
+                        <td><StatusBadge status={o.status} /></td>
+                        <td><SignaturesBadge osc={o} /></td>
+                        <td>
+                          <div className="action-btns">
+                            <button
+                              className="btn-sm-green"
+                              disabled={!podeConc}
+                              title={!podeConc ? 'Aguarda assinaturas' : ''}
+                              onClick={() => acaoOsc(o.id, 'concluir', o.descricao)}
+                            >✅ Concluir</button>
+                            <button
+                              className="btn-sm-red"
+                              onClick={() => acaoOsc(o.id, 'cancelar', o.descricao)}
+                            >❌ Cancelar</button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+</file>
+
+<file path="src/pages/LoginPage.jsx">
+import { useState } from 'react';
+import { URL_BASE, setAuth } from '../api';
+
+export default function LoginPage({ onLogin }) {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  async function fazerLogin() {
+    setError(''); setSuccess('');
+    if (!email || !senha) { setError('Digite o e-mail e a senha.'); return; }
+
+    setLoading(true);
+    try {
+      const resp = await fetch(`${URL_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha }),
+      });
+      const text = await resp.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch (_) {}
+
+      if (resp.ok && data) {
+        const u = data.usuario || data.Usuario || {};
+        const token = data.token || data.Token || '';
+        setAuth(token, u);
+        setSuccess('Login realizado com sucesso!');
+        setTimeout(() => onLogin(), 800);
+      } else if (resp.status === 401) {
+        setError('E-mail ou senha incorretos.');
+      } else {
+        setError(`Erro da API: ${resp.status}`);
+      }
+    } catch (err) {
+      setError(`Falha na conexão: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter') fazerLogin();
+  }
+
+  return (
+    <div className="login-body">
+      <div className="login-card">
+        <div className="login-logo">
+          <div className="logo-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+          </div>
+          <h1>Gerenciador de OS</h1>
+          <p className="subtitle">Faça login para continuar</p>
+        </div>
+
+        {error && <div className="alert alert-error">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
+
+        <div className="field">
+          <label>E-mail</label>
+          <div className="input-wrap">
+            <input
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') document.getElementById('pw-input').focus(); }}
+              autoComplete="email"
+            />
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Senha</label>
+          <div className="input-wrap">
+            <input
+              id="pw-input"
+              type={showPw ? 'text' : 'password'}
+              placeholder="••••••••"
+              value={senha}
+              onChange={e => setSenha(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={{ paddingRight: 40 }}
+              autoComplete="current-password"
+            />
+            <button className="toggle-pw" type="button" onClick={() => setShowPw(v => !v)}>
+              {showPw ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <button className="btn-login" onClick={fazerLogin} disabled={loading}>
+          {loading ? 'Entrando...' : 'Entrar'}
+        </button>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="src/pages/UsuariosPage.jsx">
+import { useState, useEffect } from 'react';
+import { api, userId, exibirSetor, setorParaApi } from '../api';
+import { Spinner, Empty } from '../components/UI';
+import Modal from '../components/Modal';
+
+const PERFIS = ['Emitente', 'Gerente', 'Administrador'];
+const SETORES = ['Garantia de Validação', 'Mecatrônica', 'Operação', 'Nenhum'];
+
+export default function UsuariosPage({ usuario, showAlert }) {
+  const [usuarios, setUsuarios] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [busca, setBusca] = useState('');
+  const [perfilFilter, setPerfilFilter] = useState('');
+  const [setorFilter, setSetorFilter] = useState('');
+  const [modal, setModal] = useState(null); // null | { id, nome, email, perfil, setor }
+
+  useEffect(() => { loadUsuarios(); }, []);
+
+  useEffect(() => {
+    const b = busca.trim().toLowerCase();
+    const f = usuarios.filter(u => {
+      const okB = !b || (u.Nome || u.nome || '').toLowerCase().includes(b) || (u.Email || u.email || '').toLowerCase().includes(b);
+      const okP = !perfilFilter || String(u.Perfil || u.perfil || '').toLowerCase() === perfilFilter.toLowerCase();
+      const setorApi = setorParaApi(setorFilter);
+      const okS = !setorFilter || String(u.Setor || u.setor || '').toLowerCase() === setorApi.toLowerCase();
+      return okB && okP && okS;
+    });
+    setFiltered(f);
+  }, [busca, perfilFilter, setorFilter, usuarios]);
+
+  async function loadUsuarios() {
+    setLoading(true); setError('');
+    try {
+      const r = await api('GET', '/usuarios');
+      if (!r.ok) { setError(`Erro ${r.status}`); return; }
+      setUsuarios(await r.json() || []);
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }
+
+  function abrirModal(id) {
+    const u = id ? usuarios.find(x => (x.Id || x.id) === id) : null;
+    setModal({
+      id: u ? (u.Id || u.id) : null,
+      nome: u ? (u.Nome || u.nome || '') : '',
+      email: u ? (u.Email || u.email || '') : '',
+      senha: '',
+      perfil: u ? (u.Perfil || u.perfil || 'Emitente') : 'Emitente',
+      setor: u ? exibirSetor(u.Setor || u.setor) : 'Garantia de Validação',
+    });
+  }
+
+  async function salvarUsuario() {
+    const { id, nome, email, senha, perfil: perf, setor } = modal;
+    if (!nome) { alert('Informe o nome.'); return; }
+    if (!email) { alert('Informe o email.'); return; }
+    if (!id && !senha) { alert('Informe a senha.'); return; }
+    const editando = !!id;
+    try {
+      let r;
+      if (editando) {
+        const body = senha ? { nome, email, senha, perfil: perf, setor: setorParaApi(setor) } : { nome, email, perfil: perf, setor: setorParaApi(setor) };
+        r = await api('PUT', `/usuarios/${id}`, body);
+      } else {
+        r = await api('POST', '/usuarios', { adminId: userId(usuario), nome, email, senha, perfil: perf, setor: setorParaApi(setor) });
+      }
+      if (r.ok) {
+        setModal(null);
+        showAlert(editando ? 'Usuário atualizado!' : 'Usuário criado!', 'success');
+        loadUsuarios();
+      } else {
+        showAlert(`Erro: ${r.status} — ${await r.text()}`);
+      }
+    } catch (e) { showAlert(`Erro: ${e.message}`); }
+  }
+
+  async function excluirUsuario(id, nome) {
+    if (!confirm(`Excluir "${nome}"? Não pode ser desfeito.`)) return;
+    try {
+      const r = await api('DELETE', `/usuarios/${id}`);
+      if (r.ok) { showAlert('Usuário excluído!', 'success'); loadUsuarios(); }
+      else showAlert(`Erro: ${await r.text()}`);
+    } catch (e) { showAlert(`Erro: ${e.message}`); }
+  }
+
+  return (
+    <div>
+      <div className="page-header-row">
+        <div className="page-title" style={{ margin: 0 }}>👥 Usuários</div>
+        <button className="btn-success" onClick={() => abrirModal(null)}>➕ Novo Usuário</button>
+      </div>
+      <div className="page-sub">Cadastre, edite ou remova usuários</div>
+
+      <div className="filter-bar">
+        <input placeholder="🔍 Nome ou email..." value={busca} onChange={e => setBusca(e.target.value)} />
+        <select value={perfilFilter} onChange={e => setPerfilFilter(e.target.value)}>
+          <option value="">Todos os perfis</option>
+          {PERFIS.map(p => <option key={p}>{p}</option>)}
+        </select>
+        <select value={setorFilter} onChange={e => setSetorFilter(e.target.value)}>
+          <option value="">Todos os setores</option>
+          {SETORES.map(s => <option key={s}>{s}</option>)}
+        </select>
+        <button className="btn-clear" onClick={() => { setBusca(''); setPerfilFilter(''); setSetorFilter(''); }}>✖ Limpar</button>
+      </div>
+
+      {loading ? <Spinner /> : error ? <div className="empty" style={{ color: 'red' }}>{error}</div> : (
+        filtered.length === 0 ? <Empty>Nenhum usuário encontrado.</Empty> : (
+          <div className="table-wrap">
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: 40 }}>ID</th>
+                    <th>Nome</th>
+                    <th>Perfil</th>
+                    <th>Setor</th>
+                    <th style={{ width: 110 }}>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(u => {
+                    const id = u.Id || u.id;
+                    const nome = u.Nome || u.nome || '';
+                    const perf = u.Perfil || u.perfil || '';
+                    const setor = exibirSetor(u.Setor || u.setor);
+                    return (
+                      <tr key={id}>
+                        <td>{id}</td>
+                        <td><strong>{nome}</strong></td>
+                        <td>{perf}</td>
+                        <td>{setor}</td>
+                        <td style={{ display: 'flex', gap: 5, padding: '7px 8px' }}>
+                          <button className="btn-edit" onClick={() => abrirModal(id)}>✏️</button>
+                          <button className="btn-del" onClick={() => excluirUsuario(id, nome)}>🗑️</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      )}
+
+      {modal && (
+        <Modal onClose={() => setModal(null)}>
+          <h2>{modal.id ? 'Editar Usuário' : 'Novo Usuário'}</h2>
+          <div className="form-group">
+            <label>Nome</label>
+            <input value={modal.nome} onChange={e => setModal(m => ({ ...m, nome: e.target.value }))} />
+          </div>
+          <div className="form-group">
+            <label>Email</label>
+            <input type="email" value={modal.email} onChange={e => setModal(m => ({ ...m, email: e.target.value }))} />
+          </div>
+          <div className="form-group">
+            <label>Senha{modal.id ? ' (em branco = não altera)' : ''}</label>
+            <input type="password" value={modal.senha} onChange={e => setModal(m => ({ ...m, senha: e.target.value }))} />
+          </div>
+          <div className="form-group">
+            <label>Perfil</label>
+            <select value={modal.perfil} onChange={e => setModal(m => ({ ...m, perfil: e.target.value }))}>
+              {PERFIS.map(p => <option key={p}>{p}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Setor</label>
+            <select value={modal.setor} onChange={e => setModal(m => ({ ...m, setor: e.target.value }))}>
+              {SETORES.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="modal-footer">
+            <button className="btn-primary" onClick={salvarUsuario}>💾 Salvar</button>
+            <button className="btn-clear" onClick={() => setModal(null)}>Cancelar</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+</file>
+
+<file path="src/styles.css">
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+}
+
+/* ── LAYOUT ── */
+.app-shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── HEADER ── */
+#header {
+  background: #1E50A0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 56px;
+  flex-shrink: 0;
+  gap: 8px;
+}
+#header h1 {
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.header-user { font-size: 12px; color: #B4CCEE; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+.btn-sair { background: #C41E1E; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-sair:hover { background: #a51818; }
+.btn-menu { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: #fff; flex-shrink: 0; }
+
+/* ── BODY ── */
+.app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  background: #fff;
+  border-right: 1px solid #e0e4ef;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  flex-shrink: 0;
+  transition: transform .25s ease;
+  z-index: 200;
+}
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 199;
+}
+.sidebar-overlay.open { display: block; }
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3c3c50;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background .15s, color .15s;
+  text-decoration: none;
+}
+.nav-btn:hover { background: #f0f4ff; color: #1E50A0; }
+.nav-btn.active { background: #1E50A0; color: #fff; }
+.nav-btn.disabled { color: #b08080; background: #501f1f; cursor: not-allowed; pointer-events: none; }
+.nav-btn-export { color: #7c3aed !important; }
+.nav-btn-export.active { background: #7c3aed !important; color: #fff !important; }
+.nav-btn-download { color: #0369a1 !important; text-decoration: none; border-top: 1px solid #e0e4ef; margin-top: 4px; }
+.nav-btn-download:hover { background: #f0f8ff !important; color: #0c4a6e !important; }
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
+.page-title { font-size: 20px; font-weight: 700; color: #19234a; margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: #888; margin-bottom: 18px; }
+.page-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 10px; }
+
+/* ── CHARTS ── */
+.charts-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; margin-bottom: 18px; align-items: stretch; }
+.chart-card { background: #fff; border-radius: 10px; border: 1px solid #e5e9f0; padding: 16px; }
+.chart-card h3 { font-size: 13px; font-weight: 700; color: #19234a; margin-bottom: 12px; }
+.summary-card { background: #fff; border-radius: 10px; border: 1px solid #e5e9f0; padding: 16px; min-width: 150px; }
+.summary-card h3 { font-size: 13px; font-weight: 700; color: #19234a; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #eef0f5; }
+.summary-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+.summary-item .lbl { font-size: 11px; color: #888; }
+.summary-item .val { font-size: 15px; font-weight: 700; }
+
+/* ── FILTER BAR ── */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.filter-bar input, .filter-bar select {
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #f7faff;
+  color: #1a1a1a;
+  outline: none;
+  min-width: 0;
+}
+.filter-bar input:focus, .filter-bar select:focus { border-color: #1E50A0; }
+.btn-clear { padding: 7px 12px; background: #dde0e8; color: #3c3c50; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; }
+.btn-clear:hover { background: #cdd0d8; }
+
+/* ── TABLE ── */
+.table-wrap { background: #fff; border-radius: 10px; border: 1px solid #e5e9f0; overflow: hidden; }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
+thead tr { background: #1e1e1e; }
+thead th { color: #fff; font-weight: 700; padding: 11px 10px; text-align: left; white-space: nowrap; }
+tbody tr { border-bottom: 1px solid #f0f2f6; transition: background .12s; }
+tbody tr:nth-child(even) { background: #f7f8fb; }
+tbody tr:hover { background: #eef2fc; }
+tbody td { padding: 10px 10px; color: #2a2d3c; vertical-align: middle; }
+tbody tr.clickable { cursor: pointer; }
+tbody tr.clickable:hover { background: #ddeaff; }
+tbody tr.row-selected { background: #ddeaff !important; border-left: 3px solid #1E50A0; }
+
+/* ── BADGES ── */
+.badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.badge-yellow { background: #fff4cd; color: #a05a00; }
+.badge-blue { background: #dce9ff; color: #1E50A0; }
+.badge-green { background: #dcffe8; color: #00824a; }
+.badge-red { background: #ffdede; color: #aa1e1e; }
+.badge-gray { background: #ebebeb; color: #555; }
+
+/* ── BUTTONS ── */
+.btn-primary { padding: 11px 28px; background: #1E50A0; color: #fff; border: none; border-radius: 7px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s; width: 100%; }
+.btn-primary:hover { background: #174290; }
+.btn-primary:disabled { background: #7096c8; cursor: not-allowed; }
+.btn-success { background: #00874c; color: #fff; border: none; padding: 9px 20px; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-success:hover { background: #006e3d; }
+.btn-edit { background: #1E50A0; color: #fff; border: none; padding: 6px 11px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.btn-edit:hover { background: #174290; }
+.btn-del { background: #b41e1e; color: #fff; border: none; padding: 6px 11px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.btn-del:hover { background: #921818; }
+.btn-sign { background: #00874c; color: #fff; border: none; padding: 9px 20px; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; width: 100%; }
+.btn-sign:hover { background: #006e3d; }
+.btn-sign:disabled { background: #aaa; cursor: not-allowed; }
+.btn-sm-green { background: #00874c; color: #fff; border: none; padding: 5px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-sm-green:hover { background: #006e3d; }
+.btn-sm-green:disabled { background: #aaa; cursor: not-allowed; }
+.btn-sm-red { background: #b41e1e; color: #fff; border: none; padding: 5px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-sm-red:hover { background: #921818; }
+.action-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+
+/* ── FORM ── */
+.form-section { background: #fff; border-radius: 10px; border: 1px solid #e5e9f0; padding: 24px; max-width: 680px; margin: 0 auto; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 700; color: #323268; margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 7px;
+  font-size: 14px; background: #f7faff; color: #1a1a1a; outline: none; font-family: inherit;
+}
+.form-group textarea { resize: vertical; min-height: 100px; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: #1E50A0; box-shadow: 0 0 0 3px rgba(30,80,160,.1);
+}
+
+/* ── OS DETAIL PANEL ── */
+.os-detail-panel {
+  position: fixed; right: 0; top: 56px; bottom: 0; width: 360px;
+  background: #fff; border-left: 1px solid #dde3f0;
+  box-shadow: -4px 0 20px rgba(0,0,0,.08);
+  display: flex; flex-direction: column; z-index: 150;
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+}
+.os-detail-panel.open { transform: translateX(0); }
+.panel-header { background: #1E50A0; color: #fff; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.panel-header h3 { font-size: 14px; font-weight: 700; }
+.btn-close-panel { background: none; border: none; color: #fff; cursor: pointer; font-size: 20px; line-height: 1; padding: 2px 6px; border-radius: 4px; opacity: .8; }
+.btn-close-panel:hover { opacity: 1; background: rgba(255,255,255,.15); }
+.panel-body { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
+.panel-footer { padding: 14px 16px; border-top: 1px solid #eef0f5; flex-shrink: 0; }
+.detail-section { margin-bottom: 16px; }
+.detail-section-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #eef0f5; }
+.detail-row { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.detail-row .dl { font-size: 11px; color: #888; font-weight: 500; }
+.detail-row .dv { font-size: 13px; color: #1a1a1a; font-weight: 500; word-break: break-word; }
+.detail-row .dv.texto { font-size: 13px; color: #3c3c50; line-height: 1.55; white-space: pre-wrap; }
+.sig-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 4px; }
+.sig-item { background: #f7faff; border: 1px solid #e5e9f0; border-radius: 8px; padding: 10px 8px; text-align: center; }
+.sig-item .si-label { font-size: 10px; color: #888; font-weight: 600; margin-bottom: 6px; }
+.sig-item .si-icon { font-size: 20px; line-height: 1; }
+.sig-item.signed { background: #f0fdf4; border-color: #86efac; }
+.sig-item.pending { background: #fff9f0; border-color: #fcd34d; }
+
+/* content shift when panel open (desktop) */
+@media (min-width: 769px) {
+  .panel-open .content { margin-right: 360px; transition: margin-right .3s cubic-bezier(.4,0,.2,1); }
+}
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
+.modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 520px; max-height: 92dvh; overflow-y: auto; }
+.modal h2 { font-size: 17px; font-weight: 700; color: #19234a; margin-bottom: 18px; }
+.modal-footer { display: flex; gap: 10px; margin-top: 18px; }
+.modal-footer .btn-primary { width: auto; flex: 1; }
+
+/* ── MISC ── */
+.empty { color: #888; font-size: 14px; padding: 20px; }
+.loading { color: #888; font-size: 14px; padding: 20px; display: flex; align-items: center; gap: 8px; }
+.spinner { width: 18px; height: 18px; border: 3px solid #ddd; border-top-color: #1E50A0; border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.alert-inline { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
+
+/* ── EXPORT ── */
+.export-list { max-height: 340px; overflow-y: auto; border: 1px solid #e5e9f0; border-radius: 8px; margin-bottom: 14px; }
+.export-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #f0f2f6; cursor: pointer; transition: background .12s; }
+.export-item:last-child { border-bottom: none; }
+.export-item:hover { background: #f5f8ff; }
+.export-item input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #1E50A0; flex-shrink: 0; }
+.export-item-info { flex: 1; min-width: 0; }
+.export-item-title { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+.export-item-sub { font-size: 11px; color: #888; margin-top: 1px; }
+.export-status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: #28AA5A; } .dot-red { background: #D23C3C; } .dot-yellow { background: #FFC33C; } .dot-blue { background: #3C82D2; }
+.export-select-all { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #1E50A0; cursor: pointer; margin-bottom: 8px; font-weight: 600; user-select: none; }
+.export-count { font-size: 12px; color: #888; margin-left: auto; }
+.btn-export-pdf { background: #7c3aed; color: #fff; border: none; padding: 11px 24px; border-radius: 7px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .15s; flex: 1; justify-content: center; }
+.btn-export-pdf:hover { background: #6d28d9; }
+.btn-export-pdf:disabled { background: #aaa; cursor: not-allowed; }
+
+/* ── LOGIN ── */
+.login-body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f0f2f5; }
+.login-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,.10); padding: 2.5rem 2rem; width: 100%; max-width: 420px; }
+.login-logo { text-align: center; margin-bottom: 2rem; }
+.logo-icon { width: 52px; height: 52px; background: #1E50A0; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.login-card h1 { font-size: 20px; font-weight: 600; color: #1a1a1a; }
+.subtitle { font-size: 13px; color: #6b7280; margin-top: 4px; }
+.field { margin-bottom: 1.25rem; }
+.field label { display: block; font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 500; }
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-wrap input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #1a1a1a; background: #fff; outline: none; transition: border-color .15s, box-shadow .15s; }
+.input-wrap input:focus { border-color: #1E50A0; box-shadow: 0 0 0 3px rgba(30,80,160,0.12); }
+.toggle-pw { position: absolute; right: 10px; cursor: pointer; background: none; border: none; padding: 4px; color: #9ca3af; display: flex; align-items: center; }
+.toggle-pw:hover { color: #374151; }
+.btn-login { width: 100%; padding: 11px; background: #1E50A0; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s; margin-top: .5rem; }
+.btn-login:hover { background: #174290; }
+.btn-login:active { background: #113278; transform: scale(.99); }
+.btn-login:disabled { background: #6B8FC0; cursor: not-allowed; }
+.alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; }
+.alert-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+.alert-success { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+
+/* ── TOOLTIP ── */
+[data-tip] { position: relative; }
+[data-tip]:hover::after { content: attr(data-tip); position: absolute; left: 100%; top: 50%; transform: translateY(-50%); background: #333; color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 4px; white-space: nowrap; margin-left: 8px; z-index: 100; }
+
+/* ── PRINT ── */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body, html { background: #fff !important; height: auto !important; overflow: visible !important; }
+  .app-shell, #header, .sidebar, .os-detail-panel { display: none !important; }
+  #print-area { display: block !important; }
+  .pdf-cover { page-break-after: always; padding: 48px; font-family: 'Segoe UI', Arial, sans-serif; }
+  .pdf-os { page-break-after: always; padding: 36px 48px; font-family: 'Segoe UI', Arial, sans-serif; }
+  .pdf-os:last-child { page-break-after: auto; }
+}
+#print-area { display: none; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .btn-menu { display: flex !important; }
+  .header-user { display: none; }
+  #header h1 { font-size: 13px; }
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); box-shadow: 4px 0 20px rgba(0,0,0,.15); }
+  .sidebar.open { transform: translateX(0); }
+  .content { padding: 14px; }
+  .charts-row { grid-template-columns: 1fr; }
+  .summary-card { min-width: unset; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .filter-bar input, .filter-bar select, .btn-clear { width: 100%; }
+  .page-title { font-size: 17px; }
+  .form-section { padding: 16px; }
+  .btn-primary { font-size: 14px; padding: 12px; }
+  .page-header-row { flex-direction: column; align-items: flex-start; }
+  .page-header-row .btn-success { width: 100%; }
+  .os-detail-panel { top: auto; left: 0; right: 0; bottom: 0; width: 100%; height: 82dvh; border-left: none; border-top: 1px solid #dde3f0; border-radius: 16px 16px 0 0; box-shadow: 0 -4px 24px rgba(0,0,0,.12); transform: translateY(100%); }
+  .os-detail-panel.open { transform: translateY(0); }
+}
+@media (max-width: 420px) {
+  #header h1 { font-size: 12px; }
+  .badge { font-size: 10px; padding: 2px 6px; }
+  tbody td { padding: 8px; font-size: 12px; }
+  thead th { font-size: 12px; padding: 9px 8px; }
+}
+</file>
+
+<file path="vite.config.js">
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})
+</file>
+
+</files>
