@@ -111,7 +111,7 @@
 //   return (osc.qualidadeAssinou ? 1 : 0) + (osc.engenhariaAssinou ? 1 : 0) + (osc.producaoAssinou ? 1 : 0);
 // }
 
-export const URL_BASE = 'https://triumphant-clarity-production-264b.up.railway.app';
+export const URL_BASE = 'http://200.234.218.87';
 
 export function getToken() {
   return localStorage.getItem('os_token') || '';
