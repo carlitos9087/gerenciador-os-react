@@ -301,14 +301,14 @@ export default function App() {
                   {item.label}
                 </button>
               ))}
-              <a
-                className="nav-btn nav-btn-download"
-                href="Gerenciador-OS.zip"
-                download
-                title="Baixar o aplicativo desktop"
-              >
-                💾 Baixar App Desktop
-              </a>
+<a
+  className="nav-btn nav-btn-download"
+  href="https://github.com/carlitos9087/gerenciador-os-react/raw/master/Gerenciador-OS.zip"
+  download="Gerenciador-OS.zip"
+  title="Baixar o aplicativo desktop"
+>
+  💾 Baixar App Desktop
+</a>
             </nav>
 
             <main className="content">
